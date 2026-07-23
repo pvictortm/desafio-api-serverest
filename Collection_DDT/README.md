@@ -59,7 +59,7 @@ Bash
 npm install
 4. Execute a suíte de testes passando os parâmetros de coleção, massa de dados, variável de ambiente e tipo de relatório:
 Bash
-npx newman run "Desafio_Carrefour.postman_collection.json" -d dados_usuarios.csv --env-var "url_base=[https://serverest.dev](https://serverest.dev)" -r htmlextra,cli
+npx newman run "Desafio_Carrefour.postman_collection.json" -d dados_usuarios.csv --env-var "url_base=https://serverest.dev" --delay-request 600 -r htmlextra,cli
 
 Relatórios Visuais
 Ao final das execuções via CLI, um diretório /newman será gerado automaticamente contendo o Dashboard .html com o detalhamento completo das métricas, asserções e tempos de resposta.
