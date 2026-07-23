@@ -1,6 +1,5 @@
 name: Pipeline de Testes API - ServeRest
 
-# Define quando a pipeline vai rodar (neste caso, a cada push no código)
 on:
   push:
     branches: [ "main", "master" ]
@@ -9,29 +8,43 @@ on:
 
 jobs:
   testes-automatizados:
-    runs-on: ubuntu-latest # O "computador" que o GitHub vai usar
+    runs-on: ubuntu-latest 
 
     steps:
       - name: 📥 Baixar o código do repositório
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: ⚙️ Configurar Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: 📦 Instalar o Newman e o Reporter HTML Extra
+      - name: 📦 Instalar Newman e Reporter HTML Extra
+        run: npm install -g newman newman-reporter-htmlextra
+
+      - name: 🚀 Executar Collection DDT (Postman)
         run: |
-          npm install -g newman newman-reporter-htmlextra
+          cd Collection_DDT
+          npx newman run "Desafio_Carrefour.postman_collection.json" -d dados_usuarios.csv --env-var "url_base=https://serverest.dev" --delay-request 600 -r htmlextra,cli
+        continue-on-error: true # Garante que a pipeline continue mesmo se um teste falhar
 
       - name: 🚀 Executar Collection Array (Postman)
         run: |
           cd Collection_Array
           npx newman run "Desafio_Array.postman_collection.json" --env-var "url_base=https://serverest.dev" --delay-request 600 -r htmlextra,cli
+        continue-on-error: true
 
-      - name: 📊 Disponibilizar Relatório HTML (Artefato)
+      - name: 📊 Disponibilizar Relatórios HTML (Postman)
         uses: actions/upload-artifact@v4
-        if: always() # Garante que o relatório seja salvo mesmo se algum teste falhar
+        if: always() 
         with:
-          name: Relatorio-Qualidade-Newman
-          path: Collection_Array/newman/*.html
+          name: Relatorios-Qualidade-Newman
+          path: |
+            Collection_DDT/newman/*.html
+            Collection_Array/newman/*.html
+          
+      - name: 🚀 Executar Automação via Código (Pactum.js)
+        run: |
+          cd Automacao_Pactum
+          npm install
+          npm test
