@@ -1,0 +1,16 @@
+{
+  "name": "automacao_pactum",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+"scripts": {
+    "test": "mocha *.spec.js --timeout 10000"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mocha": "^11.7.6",
+    "pactum": "^3.9.1"
+  }
+}

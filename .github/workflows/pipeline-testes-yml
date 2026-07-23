@@ -1,0 +1,37 @@
+name: Pipeline de Testes API - ServeRest
+
+# Define quando a pipeline vai rodar (neste caso, a cada push no código)
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  testes-automatizados:
+    runs-on: ubuntu-latest # O "computador" que o GitHub vai usar
+
+    steps:
+      - name: 📥 Baixar o código do repositório
+        uses: actions/checkout@v3
+
+      - name: ⚙️ Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: 📦 Instalar o Newman e o Reporter HTML Extra
+        run: |
+          npm install -g newman newman-reporter-htmlextra
+
+      - name: 🚀 Executar Collection Array (Postman)
+        run: |
+          cd Collection_Array
+          npx newman run "Desafio_Array.postman_collection.json" --env-var "url_base=https://serverest.dev" --delay-request 600 -r htmlextra,cli
+
+      - name: 📊 Disponibilizar Relatório HTML (Artefato)
+        uses: actions/upload-artifact@v4
+        if: always() # Garante que o relatório seja salvo mesmo se algum teste falhar
+        with:
+          name: Relatorio-Qualidade-Newman
+          path: Collection_Array/newman/*.html

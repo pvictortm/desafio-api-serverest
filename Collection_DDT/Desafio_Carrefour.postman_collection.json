@@ -1,0 +1,277 @@
+{
+  "info": {
+    "_postman_id": "f28f2300-876b-40be-b0b5-4ae5908d6c27",
+    "name": "Desafio - Carrefour API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "43572007",
+    "_collection_link": "https://go.postman.co/collection/43572007-f28f2300-876b-40be-b0b5-4ae5908d6c27?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "1. Cadastrar Usuário",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// 1. Testa se a criação deu certo\r",
+              "pm.test(\"Status code is 201\", function () {\r",
+              "    pm.response.to.have.status(201);\r",
+              "});\r",
+              "\r",
+              "// 2. Passando uma resposta JSON ao Postman\r",
+              "var resposta = pm.response.json();\r",
+              "\r",
+              "// 3. Pega o ID do response e guarda na var \"id_usuario\"\r",
+              "pm.collectionVariables.set(\"id_usuario\", resposta._id);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"nome\": \"{{nome}}\",\r\n  \"email\": \"{{email}}\",\r\n  \"password\": \"{{password}}\",\r\n  \"administrador\": \"{{administrador}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url_base}}/usuarios",
+          "host": [
+            "{{url_base}}"
+          ],
+          "path": [
+            "usuarios"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "2. Buscar usuário por ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url_base}}/usuarios/{{id_usuario}}",
+          "host": [
+            "{{url_base}}"
+          ],
+          "path": [
+            "usuarios",
+            "{{id_usuario}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "3. Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// 1. Testa se o login foi bem-sucedido\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "// 2. Transforma a resposta em JSON\r",
+              "var resposta = pm.response.json();\r",
+              "\r",
+              "// 3. Guarda o token recebido na variável \"token_jwt\"\r",
+              "pm.collectionVariables.set(\"token_jwt\", resposta.authorization);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"{{email}}\",\r\n  \"password\": \"{{password}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url_base}}/login",
+          "host": [
+            "{{url_base}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "4. Atualizar usuário",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 - Usuário atualizado\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{token_jwt}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"nome\": \"Fulano Atualizado da Silva\",\r\n  \"email\": \"fulanodasilva12345@teste.com\",\r\n  \"password\": \"nova_senha_super_segura\",\r\n  \"administrador\": \"true\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url_base}}/usuarios/{{id_usuario}}",
+          "host": [
+            "{{url_base}}"
+          ],
+          "path": [
+            "usuarios",
+            "{{id_usuario}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "5.Excluir usuário",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 - Usuário excluído\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{token_jwt}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{url_base}}/usuarios/{{id_usuario}}",
+          "host": [
+            "{{url_base}}"
+          ],
+          "path": [
+            "usuarios",
+            "{{id_usuario}}"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "url_base",
+      "value": ""
+    },
+    {
+      "key": "id_usuario",
+      "value": ""
+    },
+    {
+      "key": "token_jwt",
+      "value": ""
+    }
+  ]
+}

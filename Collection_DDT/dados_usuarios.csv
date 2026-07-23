@@ -1,0 +1,4 @@
+nome,email,password,administrador
+Candidato Um,candidato.um@teste.com,senha123,true
+Candidato Dois,candidato.dois@teste.com,senha123,false
+Candidato Tres,candidato.tres@teste.com,senha123,true

@@ -1,0 +1,351 @@
+{
+  "info": {
+    "_postman_id": "725e5642-4ea1-4cda-a8cc-91d13602360a",
+    "name": "Desafio - Array - Carrefour API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "43572007",
+    "_collection_link": "https://go.postman.co/collection/43572007-725e5642-4ea1-4cda-a8cc-91d13602360a?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "1. Cadastrar Multiplos Usuarios",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Verifica se a requisição foi um sucesso (Status 201)\r",
+              "pm.test(\"Status code is 201\", function () {\r",
+              "    pm.response.to.have.status(201);\r",
+              "});\r",
+              "\r",
+              "// Se a criação for bem sucedida, vamos guardar o ID\r",
+              "if (pm.response.code === 201) {\r",
+              "    // 1. Extrai o ID da resposta da API\r",
+              "    let jsonData = pm.response.json();\r",
+              "    let novoId = jsonData._id;\r",
+              "\r",
+              "    // 2. Busca o array que já existe na variável de ambiente (ou cria um novo se não existir)\r",
+              "    // convertendo o texto em lista usando JSON.parse\r",
+              "    let listaIdsSalvos = pm.collectionVariables.get(\"lista_ids_usuarios\");\r",
+              "    \r",
+              "    let meuArray = [];\r",
+              "    if (listaIdsSalvos) {\r",
+              "        meuArray = JSON.parse(listaIdsSalvos);\r",
+              "    }\r",
+              "\r",
+              "    // 3. Adiciona o novo ID no final da lista\r",
+              "    meuArray.push(novoId);\r",
+              "\r",
+              "    // 4. Transforma a lista de volta para texto (String) e salva na variável\r",
+              "    pm.collectionVariables.set(\"lista_ids_usuarios\", JSON.stringify(meuArray));\r",
+              "    \r",
+              "    console.log(\"ID adicionado na lista:\", novoId);\r",
+              "    console.log(\"Lista completa agora:\", meuArray);\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"nome\": \"Candidato Array {{$randomInt}}\",\r\n  \"email\": \"candidato.array{{$randomInt}}@teste.com\",\r\n  \"password\": \"senha\",\r\n  \"administrador\": \"true\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url_base}}/usuarios",
+          "host": [
+            "{{url_base}}"
+          ],
+          "path": [
+            "usuarios"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "2. Buscar Usuario Array",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// 1. Lê a lista de IDs que salvamos na requisição anterior\r",
+              "let listaSalva = pm.collectionVariables.get(\"lista_ids_usuarios\");\r",
+              "\r",
+              "if (listaSalva) {\r",
+              "    let meuArray = JSON.parse(listaSalva);\r",
+              "    \r",
+              "    // 2. Verifica se a lista não está vazia\r",
+              "    if (meuArray.length > 0) {\r",
+              "        \r",
+              "        // 3. A função .shift() remove o PRIMEIRO item do array e o guarda na variável\r",
+              "        let idParaConsultar = meuArray.shift();\r",
+              "        \r",
+              "        // 4. Salva esse ID extraído para ser usado na URL lá em cima ({{id_usuario_atual}})\r",
+              "        pm.collectionVariables.set(\"id_usuario_atual\", idParaConsultar);\r",
+              "        \r",
+              "        // 5. Salva a lista atualizada (agora com um ID a menos) de volta nas variáveis\r",
+              "        pm.collectionVariables.set(\"lista_ids_usuarios\", JSON.stringify(meuArray));\r",
+              "        \r",
+              "        console.log(\"Pegou da lista e vai consultar o ID:\", idParaConsultar);\r",
+              "        console.log(\"IDs que sobraram na lista para os próximos testes:\", meuArray);\r",
+              "    } else {\r",
+              "        console.log(\"Atenção: A lista de IDs está vazia! Cadastre mais usuários primeiro.\");\r",
+              "    }\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "// Extrai o e-mail da resposta e salva em uma variável\r",
+              "let dadosUsuario = pm.response.json();\r",
+              "pm.collectionVariables.set(\"email_usuario_atual\", dadosUsuario.email);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url_base}}/usuarios/{{id_usuario_atual}}",
+          "host": [
+            "{{url_base}}"
+          ],
+          "path": [
+            "usuarios",
+            "{{id_usuario_atual}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "2.1. Login JWT",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "let resposta = pm.response.json();\r",
+              "pm.collectionVariables.set(\"token_jwt\", resposta.authorization);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"{{email_usuario_atual}}\",\r\n  \"password\": \"senha\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url_base}}/login",
+          "host": [
+            "{{url_base}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "3. Atualizar Usuario",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Mensagem de sucesso na atualização\", function () {\r",
+              "    pm.expect(pm.response.text()).to.include(\"Registro alterado com sucesso\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token_jwt}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"nome\": \"Candidato Atualizado com Sucesso\",\r\n  \"email\": \"candidato.array127@teste.com\",\r\n  \"password\": \"senha\",\r\n  \"administrador\": \"true\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url_base}}/usuarios/{{id_usuario_atual}}",
+          "host": [
+            "{{url_base}}"
+          ],
+          "path": [
+            "usuarios",
+            "{{id_usuario_atual}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "4. Excluir Usuario",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Mensagem de sucesso na exclusao\", function () {\r",
+              "    pm.expect(pm.response.text()).to.include(\"Registro excluído com sucesso\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token_jwt}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url_base}}/usuarios/{{id_usuario_atual}}",
+          "host": [
+            "{{url_base}}"
+          ],
+          "path": [
+            "usuarios",
+            "{{id_usuario_atual}}"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "url_base",
+      "value": ""
+    },
+    {
+      "key": "lista_ids_usuarios",
+      "value": ""
+    },
+    {
+      "key": "id_usuario_atual",
+      "value": ""
+    },
+    {
+      "key": "email_usuario_atual",
+      "value": ""
+    },
+    {
+      "key": "token_jwt",
+      "value": ""
+    }
+  ]
+}
