@@ -1,0 +1,41 @@
+name: Pipeline de Testes API - ServeRest
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  testes-automatizados:
+    runs-on: ubuntu-latest 
+
+    steps:
+      - name: 📥 Baixar o código do repositório
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: 📦 Instalar Newman e Reporter HTML Extra
+        run: npm install -g newman newman-reporter-htmlextra
+
+      - name: 🚀 Executar Collection Array (Postman)
+        run: |
+          cd Collection_Array
+          npx newman run "Desafio_Array.postman_collection.json" --env-var "url_base=https://serverest.dev" --delay-request 600 -r htmlextra,cli
+
+      - name: 📊 Disponibilizar Relatório HTML (Postman)
+        uses: actions/upload-artifact@v4
+        if: always() 
+        with:
+          name: Relatorio-Qualidade-Newman
+          path: Collection_Array/newman/*.html
+          
+      - name: 🚀 Executar Automação via Código (Pactum.js)
+        run: |
+          cd Automacao_Pactum
+          npm install
+          npm test
